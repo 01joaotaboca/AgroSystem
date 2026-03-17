@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Agro na Palma da Mão</title>
     
+    <meta property="og:title" content="Agro na Palma da Mão">
+    <meta property="og:description" content="Sistema de Receituário de Calda Offline - Eficiência no Campo">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/2765/2765011.png">
+    <meta property="og:url" content="https://01joaotaboca.github.io/AgroSystem/">
+    <meta property="og:type" content="website">
+
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#1a531b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -66,7 +72,6 @@
             display: flex; align-items: center; justify-content: center; z-index: 1001;
         }
 
-        /* Estilo da Lista de Salvos */
         .item-salvo { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
         .item-info { font-size: 13px; line-height: 1.4; }
         .item-info strong { color: var(--primary); }
@@ -215,8 +220,6 @@
         });
     }
 
-    // --- LÓGICA DE SALVAMENTO E EDIÇÃO ---
-
     function salvarReceituario() {
         const fazenda = document.getElementById('fazenda').value.trim() || "Fazenda Sem Nome";
         if (produtos.length === 0) return alert("Adicione produtos antes de salvar!");
@@ -287,8 +290,6 @@
         localStorage.setItem('agroHistorico', JSON.stringify(historico));
         listarSalvos();
     }
-
-    // --- FUNÇÕES DE SAÍDA (PDF/WHATS) ---
 
     function enviarWhats() {
         if (produtos.length === 0) return alert("Adicione produtos!");
@@ -368,10 +369,21 @@
         doc.save(`Receituario_${fazenda}.pdf`);
     }
 
+    // FUNÇÃO DE COMPARTILHAMENTO ATUALIZADA
     function compartilharApp() {
-        const shareData = { title: 'Agro na Palma da Mão', text: 'Receituário de Calda:', url: window.location.href };
-        if (navigator.share) navigator.share(shareData);
-        else { navigator.clipboard.writeText(window.location.href); alert('Link copiado!'); }
+        const linkOficial = 'https://01joaotaboca.github.io/AgroSystem/';
+        const shareData = { 
+            title: 'Agro na Palma da Mão', 
+            text: 'Instale o aplicativo para usar offline no campo:', 
+            url: linkOficial 
+        };
+
+        if (navigator.share) {
+            navigator.share(shareData).catch((err) => console.log('Erro ao compartilhar', err));
+        } else { 
+            navigator.clipboard.writeText(linkOficial); 
+            alert('Link do Agro na Palma da Mão copiado!'); 
+        }
     }
 </script>
 </body>
