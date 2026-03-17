@@ -1,16 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Agro na Palma da Mão - João Divino</title>
+    <title>Agro na Palma da Mão</title>
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#1a531b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AgroPalma">
-    <link rel="apple-touch-icon" href="./icon.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2765/2765011.png">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
@@ -54,28 +56,20 @@
         .btn-add { background: var(--primary); color: white; }
         .btn-whats { background: #25d366; color: white; }
         .btn-pdf { background: #333; color: white; }
-        .btn-del { background: #ff4444; color: white; padding: 5px 10px; width: auto; }
+        .btn-del { background: #ff4444; color: white; padding: 5px 10px; width: auto; border: none; border-radius: 4px; cursor: pointer;}
+        .btn-edit { background: var(--accent); color: white; padding: 5px 10px; width: auto; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;}
 
-        /* ESTILO DO BOTÃO DE COMPARTILHAMENTO */
         #btnShare {
-            position: fixed;
-            bottom: 25px;
-            left: 25px; /* Lado oposto para não conflitar com outros elementos se houver */
-            width: 56px;
-            height: 56px;
-            background-color: var(--primary);
-            border: none;
-            border-radius: 50%;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            transition: transform 0.2s;
+            position: fixed; bottom: 25px; left: 25px; width: 56px; height: 56px;
+            background-color: var(--primary); border: none; border-radius: 50%;
+            color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; z-index: 1001;
         }
-        #btnShare:active { transform: scale(0.9); }
+
+        /* Estilo da Lista de Salvos */
+        .item-salvo { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        .item-info { font-size: 13px; line-height: 1.4; }
+        .item-info strong { color: var(--primary); }
 
         .footer { text-align: center; margin-top: 20px; font-size: 11px; color: #999; }
     </style>
@@ -84,7 +78,7 @@
 
     <div class="tela-inicial" id="inicio">
         <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Agro na Palma da Mão</h1>
-        <p style="font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9;">Desenvolvido por <strong>João Divino Barbosa</strong></p>
+        <p style="font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9;">Eficiência no Campo</p>
         <button class="btn-entrar" onclick="abrirSistema()">ENTRAR NO SISTEMA</button>
     </div>
 
@@ -100,8 +94,7 @@
         <div class="container">
             <div class="card">
                 <div class="grid-inputs">
-                    <div style="grid-column: span 2;"><label>Engenheiro Agrônomo</label><input id="agronomo" value="João Divino Barbosa"></div>
-                    <div><label>Fazenda/Talhão</label><input id="fazenda" placeholder="Área"></div>
+                    <div style="grid-column: span 2;"><label>Fazenda/Talhão</label><input id="fazenda" placeholder="Identificação da Área"></div>
                 </div>
 
                 <div class="grid-inputs">
@@ -118,7 +111,7 @@
 
                 <h3 style="color:var(--primary)">Produtos</h3>
                 <div class="grid-inputs" style="grid-template-columns: 2fr 1fr 1fr;">
-                    <input id="prodNome" placeholder="Produto">
+                    <input id="prodNome" placeholder="Nome do Produto">
                     <input type="number" id="prodDose" placeholder="Dose">
                     <select id="prodUnidade"><option>L/ha</option><option>kg/ha</option><option>ml/ha</option><option>g/ha</option></select>
                 </div>
@@ -137,54 +130,46 @@
                     <tbody id="lista"></tbody>
                 </table>
 
-                <textarea id="obs" rows="3" placeholder="Observações..."></textarea>
+                <textarea id="obs" rows="3" placeholder="Observações adicionais..."></textarea>
 
                 <div style="margin-top: 20px;">
                     <button class="btn btn-pdf" onclick="gerarPDF()">📄 GERAR PDF</button>
                     <button class="btn btn-whats" onclick="enviarWhats()">✅ ENVIAR WHATSAPP</button>
                 </div>
-                <div class="footer">João Divino Barbosa</div>
+            </div>
+
+            <div class="card">
+                <h3 style="color:var(--primary)">📋 Receituários Salvos</h3>
+                <div id="lista-salvos" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #eee; border-radius: 8px;">
+                    </div>
+                <button class="btn btn-add" style="background:#666" onclick="salvarReceituario()">💾 SALVAR ESTE RECEITUÁRIO</button>
+                <div class="footer">Desenvolvido por João Divino Barbosa</div>
             </div>
         </div>
     </div>
 
 <script>
-    // MODO OFFLINE
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Modo offline pronto.'))
-                .catch(err => console.log('Erro ao registar sw:', err));
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
         });
     }
 
     let produtos = [];
 
-    // FUNÇÃO DE COMPARTILHAMENTO
-    function compartilharApp() {
-        const shareData = {
-            title: 'Agro na Palma da Mão',
-            text: 'Acesse o sistema de Receituário de Calda desenvolvido por João Divino:',
-            url: window.location.href 
-        };
+    window.addEventListener('load', () => {
+        listarSalvos();
+    });
 
-        if (navigator.share) {
-            navigator.share(shareData).catch(err => console.log(err));
-        } else {
-            navigator.clipboard.writeText(shareData.url);
-            alert('Link do aplicativo copiado!');
-        }
+    function abrirSistema() {
+        document.getElementById("inicio").style.display = "none";
+        document.getElementById("app").style.display = "block";
     }
 
     function limpaZero(num) {
         if (num === 0) return "0";
         let n = parseFloat(num.toFixed(4));
         return n.toString().replace(".", ",");
-    }
-
-    function abrirSistema() {
-        document.getElementById("inicio").style.display = "none";
-        document.getElementById("app").style.display = "block";
     }
 
     function addProduto() {
@@ -230,16 +215,89 @@
         });
     }
 
+    // --- LÓGICA DE SALVAMENTO E EDIÇÃO ---
+
+    function salvarReceituario() {
+        const fazenda = document.getElementById('fazenda').value.trim() || "Fazenda Sem Nome";
+        if (produtos.length === 0) return alert("Adicione produtos antes de salvar!");
+
+        const registro = {
+            id: Date.now(),
+            data: new Date().toLocaleString('pt-BR'),
+            fazenda: fazenda,
+            area: document.getElementById('area').value,
+            tanque: document.getElementById('tanque').value,
+            calda: document.getElementById('calda').value,
+            obs: document.getElementById('obs').value,
+            produtos: [...produtos]
+        };
+
+        let historico = JSON.parse(localStorage.getItem('agroHistorico')) || [];
+        historico.unshift(registro);
+        localStorage.setItem('agroHistorico', JSON.stringify(historico));
+        
+        alert("Receituário salvo com sucesso!");
+        listarSalvos();
+    }
+
+    function listarSalvos() {
+        const listaDiv = document.getElementById('lista-salvos');
+        const historico = JSON.parse(localStorage.getItem('agroHistorico')) || [];
+        
+        if (historico.length === 0) {
+            listaDiv.innerHTML = '<p style="padding:20px; font-size: 13px; color: #666; text-align:center;">Nenhum item salvo.</p>';
+            return;
+        }
+
+        listaDiv.innerHTML = historico.map((item, index) => `
+            <div class="item-salvo">
+                <div class="item-info">
+                    <strong>${item.fazenda.toUpperCase()}</strong><br>
+                    <small>${item.data} - ${item.produtos.length} itens</small>
+                </div>
+                <div style="display:flex">
+                    <button class="btn-edit" onclick="carregarReceituario(${index})">✎</button>
+                    <button class="btn-del" onclick="excluirSalvo(${index})">X</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function carregarReceituario(index) {
+        const historico = JSON.parse(localStorage.getItem('agroHistorico'));
+        const item = historico[index];
+
+        document.getElementById('fazenda').value = item.fazenda;
+        document.getElementById('area').value = item.area;
+        document.getElementById('tanque').value = item.tanque;
+        document.getElementById('calda').value = item.calda;
+        document.getElementById('obs').value = item.obs;
+        
+        produtos = [...item.produtos];
+        
+        atualizar();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        alert("Editando: " + item.fazenda);
+    }
+
+    function excluirSalvo(index) {
+        if (!confirm("Excluir este registro?")) return;
+        let historico = JSON.parse(localStorage.getItem('agroHistorico'));
+        historico.splice(index, 1);
+        localStorage.setItem('agroHistorico', JSON.stringify(historico));
+        listarSalvos();
+    }
+
+    // --- FUNÇÕES DE SAÍDA (PDF/WHATS) ---
+
     function enviarWhats() {
         if (produtos.length === 0) return alert("Adicione produtos!");
-        const data = new Date().toLocaleString('pt-BR');
         const f = (id) => document.getElementById(id).value;
         const tanque = parseFloat(f('tanque'));
         const calda = parseFloat(f('calda'));
         
         let txt = `🚜 *AGRO NA PALMA DA MÃO*\n`;
-        txt += `📅 ${data}\n`;
-        txt += `👨‍🌾 *Agrônomo:* ${f('agronomo')}\n`;
+        txt += `📅 ${new Date().toLocaleString('pt-BR')}\n`;
         txt += `📍 *Fazenda:* ${(f('fazenda') || 'Geral').toUpperCase()}\n`;
         txt += `📏 Área: ${f('area')} ha | Vazão: ${f('calda')} L/ha\n`;
         txt += `━━━━━━━━━━━━━━━━━━━━\n`;
@@ -266,9 +324,6 @@
         if (produtos.length === 0) return alert("Adicione produtos!");
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const data = new Date().toLocaleString('pt-BR');
-        
-        const agronomo = document.getElementById('agronomo').value.toUpperCase();
         const fazenda = document.getElementById('fazenda').value.toUpperCase() || "GERAL";
         const area = parseFloat(document.getElementById('area').value) || 0;
         const tanqueVal = parseFloat(document.getElementById('tanque').value) || 0;
@@ -280,7 +335,7 @@
         doc.setFontSize(22);
         doc.text("AGRO NA PALMA DA MÃO", 105, 18, { align: "center" });
         doc.setFontSize(10);
-        doc.text(`RESPONSÁVEL: ${agronomo} | DATA: ${data}`, 105, 30, { align: "center" });
+        doc.text(`GERADO EM: ${new Date().toLocaleString('pt-BR')} | DESENVOLVIDO POR JOÃO DIVINO BARBOSA`, 105, 30, { align: "center" });
 
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(11);
@@ -288,19 +343,12 @@
         doc.text(`FAZENDA: ${fazenda}`, 15, 50);
         doc.setFont("helvetica", "normal");
         doc.text(`ÁREA: ${limpaZero(area)} HA | VAZÃO: ${limpaZero(caldaVal)} L/HA`, 15, 56);
-        doc.text(`LOGÍSTICA: ${document.getElementById("total-tanques").innerText} TANQUES (ÚLTIMO COM ${document.getElementById("resto-tanque").innerText})`, 15, 62);
+        doc.text(`LOGÍSTICA: ${document.getElementById("total-tanques").innerText} TANQUES`, 15, 62);
         
         const dadosTabela = produtos.map(p => {
             const doseTanque = (p.dose * tanqueVal / caldaVal);
             const totalArea = (p.dose * area);
-            const unidadeSimples = p.unidade.split('/')[0];
-            
-            return [
-                p.nome.toUpperCase(),
-                `${limpaZero(p.dose)} ${p.unidade}`,
-                `${limpaZero(doseTanque)} ${unidadeSimples}`,
-                `${limpaZero(totalArea)} ${unidadeSimples}`
-            ];
+            return [p.nome.toUpperCase(), `${limpaZero(p.dose)} ${p.unidade}`, `${limpaZero(doseTanque)} ${p.unidade.split('/')[0]}`, `${limpaZero(totalArea)} ${p.unidade.split('/')[0]}`];
         });
 
         doc.autoTable({
@@ -308,21 +356,22 @@
             head: [['PRODUTO', 'DOSE/HA', 'NO TANQUE', 'TOTAL ÁREA']],
             body: dadosTabela,
             theme: 'grid',
-            headStyles: { fillStyle: [26, 83, 27], textColor: [255, 255, 255] },
-            styles: { fontSize: 9, halign: 'left' },
-            columnStyles: { 2: { halign: 'center' }, 3: { halign: 'center' } }
+            headStyles: { fillStyle: [26, 83, 27] }
         });
 
-        const observacao = document.getElementById("obs").value;
-        if (observacao) {
-            let finalY = doc.lastAutoTable.finalY + 10;
-            doc.setFont("helvetica", "bold");
-            doc.text("OBSERVAÇÕES:", 15, finalY);
-            doc.setFont("helvetica", "normal");
-            doc.text(doc.splitTextToSize(observacao, 180), 15, finalY + 5);
+        const obs = document.getElementById("obs").value;
+        if (obs) {
+            doc.text("OBSERVAÇÕES:", 15, doc.lastAutoTable.finalY + 10);
+            doc.text(doc.splitTextToSize(obs, 180), 15, doc.lastAutoTable.finalY + 16);
         }
 
         doc.save(`Receituario_${fazenda}.pdf`);
+    }
+
+    function compartilharApp() {
+        const shareData = { title: 'Agro na Palma da Mão', text: 'Receituário de Calda:', url: window.location.href };
+        if (navigator.share) navigator.share(shareData);
+        else { navigator.clipboard.writeText(window.location.href); alert('Link copiado!'); }
     }
 </script>
 </body>
